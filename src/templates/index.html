@@ -1,0 +1,103 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        {% block  title %}
+            <title>Accueil du site</title>
+        {% endblock  %}
+        <link rel="stylesheet" href="{% static 'css/bootstrap.min.minty.css' %}">
+    </head>
+
+    <body style=>
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">Bic&Co</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarColor02">
+                <ul class="navbar-nav me-auto">
+
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'articles:home' %}">Home</a>
+                    </li>
+
+                    {% if request.user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account:logout' %}">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account:detail' slug=request.user.username|slugify %}">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'commande:home' %}">Mon Panier</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account:login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account:signup' %}">SignUp</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                {% block category %}
+                <div class="text-right">
+                    <ul class="navbar-nav ">
+                        {% if request.user.is_authenticated and request.user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'articles:create' %}">Ajouter un article</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Stat
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item col-2 btn btn-outline-primary" href="{% url 'articles:home' %}">Articles</a>
+                                <a class="dropdown-item col-2 btn btn-outline-primary" href="{% url 'account:stat' %}">Clients</a>
+                                <a class="dropdown-item col-2 btn btn-outline-primary" href="{% url 'account:stat' %}">Commande</a>
+                            </div>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Catégories
+                            </a>
+                            <form method='GET' action='/articles/'>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                    <input type="submit" name='q1' class="dropdown-item col-2 btn btn-outline-primary" value='Catégorie 1'>
+                                    <input type="submit" name='q2' class="dropdown-item col-2 btn btn-outline-primary" value='Catégorie 2'>
+                                    <input type="submit" name='q3' class="dropdown-item col-2 btn btn-outline-primary" value='Catégorie 3'>
+                                </div>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                {% endblock %}
+                {% block search %}
+                <form class="d-flex" method='GET' action='/articles/'>
+                    <input class="form-control me-sm-2" type="text" name='q' placeholder='Search'>
+                    <button class="btn btn-secondary my-2 my-sm-0" value='Rechercher' type="submit">Search</button>
+                </form>
+                {% endblock %}
+                </div>
+            </div>
+            </nav>
+
+        <section id = "site">
+        {% block content %}
+        {% endblock %}
+        </section>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    </body>
+    
+</html>

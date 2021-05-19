@@ -1,0 +1,19 @@
+{% extends 'index.html' %}
+
+{% block  title %}
+    <title>Edit Profile</title>
+{% endblock  %}
+
+{% block content %}
+    <div class="text-center mt-5">
+    <h1>Modifier le profile</h1>
+    {% if request.slug == request.user.slug %}
+    <form method='POST' class="mt-5">
+        {% csrf_token %}
+        {{ form }}
+        <input class="btn btn-secondary" type="submit" value="Modifier">
+    </form>
+    {% endif %}
+    </div>
+
+{% endblock %}

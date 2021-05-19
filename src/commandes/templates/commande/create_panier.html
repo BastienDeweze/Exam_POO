@@ -1,0 +1,18 @@
+{% extends 'index.html' %}
+
+{% block  title %}
+    <title>Créer un article</title>
+{% endblock  %}
+
+{% block content %}
+    <div class="text-center mt-5">
+        <h1 class="mb-5">Ajouter un article</h1>
+
+        <form method='POST'>
+            {% csrf_token %}
+            {{ form }}<br>
+            <input class="btn btn-secondary mt-5" type="submit" value="Ajouter au panier">
+        </form>
+    </div>
+
+{% endblock %}

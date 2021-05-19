@@ -1,0 +1,74 @@
+{% extends 'index.html' %}
+
+{% block  title %}
+    <title>Stat clients</title>
+{% endblock  %}
+
+{% block search %}
+<form class="d-flex" method='GET' action='/account/'>
+    <input class="form-control me-sm-2" type="text" name='q' placeholder='Search'>
+    <button class="btn btn-secondary my-2 my-sm-0" value='Rechercher' type="submit">Search</button>
+</form>
+{% endblock %}
+            
+{% block content %}
+    <form method='GET' action='/account/'>
+        <div class="mt-3 row justify-content-around">
+            <input type="submit" name='q1' class="col-2 btn btn-outline-primary" value='Top client'>
+            <input type="submit" name='q2' class="col-2 btn btn-outline-primary" value='Nul client'>
+            <input type="submit" name='q3' class="col-2 btn btn-outline-primary" value='Top ville client'>
+        </div>
+    </form>
+
+    <header class="image_bur">
+        <h1 class="text-center m-5">Liste des clients</h1>
+    </header>
+    <div class='container'>
+    <div class="row justify-content-around custom-line">
+    <ul class="list-group">
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <strong class="col-2">Utilisateur</strong>
+        <strong class="col-2">Achat courant</strong>
+        <strong class="col-2">Achat total</strong>
+        <strong class="col-2">Ectit compte</strong>
+        <strong class="col-2">Supprimer compte</strong>
+    </li>
+    {% for u in userprofile %}
+
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a class="col-2" href="{% url 'account:detail' slug=u.slug %}">{{ u.user.id }} : {{ u.first_name }} {{ u.first_name }}</a>
+            <a class="col-2" href="{% url 'account:detail' slug=u.slug %}">Achat courant : {{ u.number_of_purchase }}</a>
+            <a class="col-2" href="{% url 'account:detail' slug=u.slug %}">Achat total : {{ u.total_number_of_purchase }}</a>
+            <a class="col-2 text-danger" href="{% url 'account:edit-admin' slug=u.slug %}" class="text-danger">Editer</a>
+            <a class="col-2 text-danger" href="{% url 'account:delete' slug=u.slug %}">Supprimer</a>
+        </li>
+
+        <!--<div class="card mb-3 m-1 col-10 col-lg-5 col-xl-3">
+            <a href="{% url 'account:detail' slug=u.slug %}">
+                <h3 class="card-header">{{ u.user.id }}</h3>
+                <svg xmlns="http://www.w3.org/2000/svg" class="d-block user-select-none" width="100%" height="200" aria-label="Placeholder: Image cap" focusable="false" role="img" preserveAspectRatio="xMidYMid slice" viewBox="0 0 318 180" style="font-size:1.125rem;text-anchor:middle">
+                    <rect width="100%" height="100%" fill="#868e96"></rect>
+                    <text x="50%" y="50%" fill="#dee2e6" dy=".3em">{{ u.first_name }} {{ u.first_name }}</text>
+                </svg>
+                <div class="card-body">
+                    <p class="card-text">Achat courant : {{ u.number_of_purchase }}</p>
+                    <p class="card-text">Achat total : {{ u.total_number_of_purchase }}</p>
+                </div>
+                {% if request.user.is_authenticated and request.user.is_superuser %}
+                <div class="card-body text-center">
+                    <a href="{% url 'account:edit' slug=u.slug %}" class="text-danger card-link">Editer</a>
+                </div>
+                {% endif %}
+                <div class="card-footer text-muted">
+                    Inscription le : {{u.created_on }}
+                </div>
+            </a>
+        </div>-->
+        
+
+    {% endfor %}
+    </ul>
+    </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'index.html' %}
+
+{% block  title %}
+    <title>{{ article.name }}</title>
+{% endblock  %}
+
+{% block content %}
+
+    <div>
+        <h2>{{ article.name }}</h2>
+        <h3>{{ article.price }}</h3>
+        <p>{{ article.description|linebreaks|safe }}</p>
+
+    </div>
+
+{% endblock %}
