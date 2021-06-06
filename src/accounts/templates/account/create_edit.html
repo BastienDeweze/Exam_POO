@@ -1,19 +1,23 @@
 {% extends 'index.html' %}
+{% load crispy_forms_tags %}
 
 {% block  title %}
     <title>Edit Profile</title>
 {% endblock  %}
 
 {% block content %}
-    <div class="text-center mt-5">
-    <h1>Modifier le profile</h1>
-    {% if request.slug == request.user.slug %}
-    <form method='POST' class="mt-5">
-        {% csrf_token %}
-        {{ form }}
-        <input class="btn btn-secondary" type="submit" value="Modifier">
-    </form>
-    {% endif %}
-    </div>
 
+    <div class='container'>
+        <div class="row justify-content-around mt-5">
+            <h1>Modifier le profile</h1>
+            {% if request.slug == request.user.slug %}
+                <form method='POST' class="mt-5">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <input class="btn btn-secondary mt-2" type="submit" value="Modifier">
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    
 {% endblock %}

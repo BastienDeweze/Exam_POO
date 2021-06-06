@@ -5,23 +5,27 @@
 {% endblock  %}
 
 {% block content %}
-<div class="text-center mt-5">
-    <h1>Commander</h1>
-{% if nb_art_tot > 0 %}
-    <form method='POST'>
-    <p>Confirmer ma commande</p>
-        {% csrf_token %}
-        {{ form }}
-        <input class="btn btn-secondary" type="submit" value="Commander">
-    </form>
-    {% else %}
-    <form method='POST'>
-        <p>Vous n'avez pas d'articles dans votre panier</p>
-        {% csrf_token %}
-        {{ form }}
-        <input class="btn btn-secondary" type="submit" value="Retour">
-    </form>
-    {% endif %}
+
+    <div class="text-center mt-5">
+        <h1>Commander</h1>
+
+        {% if nb_art_tot > 0 %}
+            <form method='POST'>
+                <p>Confirmer ma commande</p>
+                {% csrf_token %}
+                {{ form }}
+                <input class="btn btn-secondary" type="submit" value="Commander">
+            </form>
+
+        {% else %}
+            <form method='POST'>
+                <p>Vous n'avez pas d'articles dans votre panier</p>
+                {% csrf_token %}
+                {{ form }}
+                <input class="btn btn-secondary" type="submit" value="Retour">
+            </form>
+        {% endif %}
+        
     </div>
 
 {% endblock %}

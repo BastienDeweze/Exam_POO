@@ -6,18 +6,20 @@
 
 {% block content %}
     <div class="text-center mt-5">
-        <h1>Mon profile</h1>
+        <h1 class="display-4">Mon profile</h1>
 
-        <h2>{{userprofile.first_name}} {{userprofile.last_name}}<h2>
-
-        <ul>
-            <li>Nombre total d'achat : {{ userprofile.total_number_of_purchase}}</li>
-            <li>Nombre d'achat courant : {{ userprofile.number_of_purchase}}</li>
-        </ul>
-        {% if request.user.is_superuser or request.user.username|slugify ==  userprofile.slug %}
-        <a href="{% url 'account:edit' slug=userprofile.slug %}" class="card-link">Editer</a>
-        <a href="{% url 'account:delete' slug=userprofile.slug %}" class="text-danger card-link">Supprimer</a>
-        {% endif %}
+        <div class="my-5">
+            <h2 class="mt-2"><strong>{{userprofile.first_name}} {{userprofile.last_name}}</strong><h2>
+            <ul class="list-unstyled">
+                <li>Nombre total d'achat : {{ userprofile.total_number_of_purchase}}</li>
+                <li>Nombre d'achat courant : {{ userprofile.number_of_purchase}}</li>
+                <li>ZipCode : {{ userprofile.city}}</li>
+            </ul>
+            {% if request.user.username|slugify ==  userprofile.slug %}
+                <a href="{% url 'account:edit' slug=userprofile.slug %}" class="card-link">Editer</a>
+                <a href="{% url 'account:delete' slug=userprofile.slug %}" class="text-danger card-link">Supprimer</a>
+            {% endif %}
+        </div>
     </div>
 
 {% endblock %}

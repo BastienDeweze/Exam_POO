@@ -1,17 +1,20 @@
 {% extends 'index.html' %}
-
+{% load crispy_forms_tags %}
 {% block  title %}
     <title>Modifier article</title>
 {% endblock  %}
 
 {% block content %}
-
-    <h1>Modifier l'article</h1>
-
-    <form method='POST'>
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Modifier">
-    </form>
+<div class='container'>
+    <div class="row justify-content-around">
+        <h1 class='text-center'>Modifier l'article</h1>
+        
+        <form method='POST' novalidate enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <input class="btn btn-secondary" type="submit" value="Modifier">
+        </form>
+    </div>
+</div>
 
 {% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'index.html' %}
+
+{% block  title %}
+    <title>{{ commande.id }}</title>
+{% endblock  %}
+
+{% block content %}
+
+    <div>
+        <h1>Commande numéro {{ commande.id }}</h1>
+        <h2>Client {{ commande.user.id }} : {{ commande.user }}</h2>
+        
+        {% for a in articles %}
+            <span >{{ a.article }} {{ a.quantity }} x {{ a.article.price }} = {{ a.price }} €</span><br>
+        {% endfor %}
+
+    </div>
+
+{% endblock %}

@@ -1,4 +1,5 @@
 {% extends 'index.html' %}
+{% load crispy_forms_tags %}
 
 {% block  title %}
     <title>Créer un compte</title>
@@ -6,12 +7,16 @@
 
 {% block content %}
 
-    <h1>Sign-Up</h1>
 
-    <form action="{% url 'account:signup' %}"method='POST'>
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Sign Up">
-    </form>
+<div class='container'>
+    <div class="row justify-content-around mt-5">
+        <h1>Sign-Up</h1>
 
+        <form action="{% url 'account:signup' %}"method='POST'>
+            {% csrf_token %}
+            {{ form|crispy }}
+            <input class="btn btn-secondary mt-2" type="submit" value="Sign Up">
+        </form>
+    </div>
+</div>
 {% endblock %}

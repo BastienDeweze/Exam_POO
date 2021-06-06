@@ -18,6 +18,7 @@ class TestAuth(TestCase):
             "email": "bass@yahoo.com",
             'username': 'bass'
         }
+
     def test_form_register(self):
         
         form = UserRegisterForm(self.form_data)
@@ -49,7 +50,8 @@ class TestProfile(TestCase):
         self.user = get_user_model().objects.create(first_name='name_test', 
                                                         username='test',
                                                         password='12test12',
-                                                        email='test@example.com')
+                                                        email='test@example.com',
+                                                        is_superuser=1)
         self.us = UserProfile.objects.get(user=self.user)
 
 
@@ -82,10 +84,97 @@ class TestProfile(TestCase):
         self.assertTrue(self.us.user.email, 'test@example.com')
 
     def test_delete_user(self):
-        self.us.delete()
-        self.assertFalse(UserProfile.objects.filter(user=self.user).exists())
-        self.assertFalse(get_user_model().objects.filter(pk=self.user.id).exists())
+
+        self.client.force_login(self.user)
+        prof = UserProfile.objects.get(user=self.user)
+        slug = prof.slug
+        lenQueryset = len(User.objects.all())
+        response = self.client.post(reverse('account:delete', kwargs={'slug': slug}))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(User.objects.all()), lenQueryset - 1)
+        self.assertFalse(User.objects.filter(pk=prof.user_id).exists())
+
+
+class TestStatUser(TestCase):
+
+
+    def setUp(self):
+        self.user = User.objects.create(username="bastien", 
+                                            password='12test2', 
+                                            email='bast@example.com', 
+                                            is_superuser=1
+                                                        )
+
+        self.userprofile = UserProfile.objects.get(user=self.user)
+
+        self.user_2 = User.objects.create(username="bastien_2", 
+                                            password='12test2', 
+                                            email='bas_2t@example.com', 
+                                            is_superuser=0
+                                                        )
+
+        self.userprofile_2 = UserProfile.objects.get(user=self.user_2)
+
+        self.user_3 = User.objects.create(username="bastie_3", 
+                                            password='12test2', 
+                                            email='bast_3@example.com', 
+                                            is_superuser=0
+                                                        )
+
+        self.userprofile_3 = UserProfile.objects.get(user=self.user_3)
+
+        self.userprofile.total_number_of_purchase = 5
+        self.userprofile_2.total_number_of_purchase = 10
+        self.userprofile_3.total_number_of_purchase = 15
+
+        self.userprofile.city = "0000"
+        self.userprofile_2.city = "0001"
+        self.userprofile_3.city = "0001"
+
+        self.userprofile.save()
+        self.userprofile_2.save()
+        self.userprofile_3.save()
         
-    # def test_shearch_profile(self):
-    #     response = self.client.get('/account/?q=test/')
-    #     print(response.__dict__)
+    def test_shearch_top_profile(self):
+
+        self.client.force_login(self.user)
+        
+        response = self.client.get('/account/?q1=Top client')
+        print(response.context['userprofile'])
+        self.assertEqual(len(response.context['userprofile']), 1)
+        self.assertEqual(response.context['userprofile'][0].user.email, 'bast_3@example.com')
+        self.assertEqual(response.status_code, 200)
+
+    def test_shearch_nul_profile(self):
+
+        self.client.force_login(self.user)
+        
+        response = self.client.get('/account/?q1=Top ville client')
+        print(response.context['userprofile'])
+        self.assertEqual(len(response.context['userprofile']), 2)
+        for i in response.context['userprofile'] :
+            self.assertEqual(i.city, "0001")
+        self.assertEqual(response.status_code, 200)
+
+
+
+
+
+# class MaClass():
+
+#     """[summary]
+#         Description de ma classe
+#     """
+
+#     def __init__(self, param1, param20):
+#         pass
+
+#     def uneFonction(self, param1):
+#         """[summary]
+#             Description de ma fonction
+
+#         Args:
+#             param1 ([type]): Description de mon param1
+#         """
+#         pass
