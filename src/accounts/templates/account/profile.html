@@ -16,8 +16,10 @@
                 <li>ZipCode : {{ userprofile.city}}</li>
             </ul>
             {% if request.user.username|slugify ==  userprofile.slug %}
-                <a href="{% url 'account:edit' slug=userprofile.slug %}" class="card-link">Editer</a>
-                <a href="{% url 'account:delete' slug=userprofile.slug %}" class="text-danger card-link">Supprimer</a>
+                <a style="width: 20rem;" href="{% url 'commande:my-orders' %}" class=" my-2 btn btn-outline-info">Mes commandes</a><br>
+                <a style="width: 20rem;" href="{% url 'account:edit' slug=userprofile.slug %}" class="my-2 btn btn-outline-primary">Editer</a><br>
+                <a style="width: 20rem;" href="{% url 'account:delete' slug=userprofile.slug %}" class="my-2 btn btn-outline-danger">Supprimer</a>
+            
             {% endif %}
         </div>
     </div>

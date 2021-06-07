@@ -221,9 +221,22 @@ class DetailCommande(UserPassesTestMixin, DetailView):
     success_url = reverse_lazy('commande:stat')
 
     def test_func(self, *args, **kwargs):
-        return self.request.user.is_superuser
+        print(self.request.resolver_match.kwargs.get('pk'))
+        order = ValidatedOrder.objects.get(pk=self.request.resolver_match.kwargs.get('pk'))
+        return self.request.user.is_superuser or order.user == self.request.user
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context["articles"] = LigneCommande.objects.filter(order=kwargs['object'])
         return context
+
+class MyOrders(ListView):
+    model = ValidatedOrder
+    context_object_name = "commande"
+    template_name = "commande/my_validatedorder_list.html"
+
+
+    def get_queryset(self):
+        queryset = super().get_queryset().filter(user=self.request.user)
+
+        return queryset

@@ -1,0 +1,61 @@
+{% extends 'index.html' %}
+
+{% block  title %}
+    <title>Accueil du site</title>
+{% endblock  %}
+
+{% block search %}
+    <form class="d-flex" method='GET' action='/order/'>
+        <input class="form-control me-sm-2" type="text" name='q' placeholder='Search'>
+        <button class="btn btn-secondary my-2 my-sm-0" value='Rechercher' type="submit">Search</button>
+    </form>
+{% endblock %}
+            
+{% block content %}
+
+    <header class="image_bur">
+        <h1 class="text-center m-5">Mes commandes</h1>
+    </header>
+
+
+    <div class='container'>
+        <div class="row justify-content-around custom-line">
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <strong class="col-1">Utilisateur</strong>
+                    
+                    <strong class="col-1">Quantité</strong>
+                
+                    <strong class="col-1">Prix total</strong>
+                
+                    <strong class="col-1">Date</strong>
+                
+                    <strong class="col-1">Reduction</strong>
+
+                    <strong class="col-1">Detail</strong>
+                </li>
+
+                {% for c in commande %}
+                    
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span class="col-1">{{ c.user }}</span>
+                            <span class="col-1">{{ c.tot_quantity }}</span>
+                            <span class="col-1">{{ c.tot_price }} €</span>
+                            <span class="col-1">{{ c.created_on }}</span>
+                            {% if c.reduction %}
+                                <span class="col-1 text-primary">{{ c.reduction }}</span>
+                            {% else %}
+                                <span class="col-1 text-danger">{{ c.reduction }}</span>
+                            {% endif %}
+                            <a class="col-1  text-danger" href="{% url 'commande:detail-order' pk=c.id %}">+</a>
+                        </li>
+                    
+
+                {% endfor %}
+            </ul>  
+        </div>
+    </div>
+
+    <p><strong>{{ success_message }}</strong></p>
+
+{% endblock %}

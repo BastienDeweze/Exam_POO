@@ -309,7 +309,7 @@ class TestStatCommande(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['commande']), 3)
 
-    def test_search_month(self):
+    def test_search_jour(self):
         self.client.force_login(self.user_2)
         
         response = self.client.get('/order/?q1=Jour')
