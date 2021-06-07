@@ -18,12 +18,27 @@ from django.contrib import messages
 # Create your views here.
 
 class PanierCreate(CreateView):
+
+    """
+    CreateView créant le panier des utilisateurs.
+    """
+
     model = Panier
     template_name = "commande/create_panier.html"
     fields = ["quantity" ]
     success_message = "Article ajouté avec succes"
 
     def form_valid(self, form):
+
+        """Fonction créant ou midifiant une ligne de panier avec un article et une quantité choisie par l'utilisateur.
+
+        Args:
+            form (Form): Information necessaire à la création d'une ligne de panier
+
+        Returns:
+            HTTPResponse: L'url vers lequel l'utilisaeur sera redirigé après la création de la ligne du panier
+        """
+
         article = get_object_or_404(Article, slug=self.kwargs['slug'])
         panier = Panier.objects.filter(user=self.request.user)
         if article.name not in [i.articles.name for i in panier]:
@@ -37,11 +52,23 @@ class PanierCreate(CreateView):
             return redirect('commande:home')
 
 class PanierHome(ListView):
+
+    """
+    ListView affichant le panier d'un utilisateur avec le total et la reduction (si il y en a).
+    """
+
     model = Panier
     context_object_name = "panier"
     template_name = "commande/panier_list.html"
 
     def get_context_data(self, *args, **kwargs):
+
+        """Fonction modifiant le context pour y ajouter le nombre d'article total, le prix total, la reduction et le nouveau prix (si il y a reduction)
+
+        Returns:
+            dict: Le nouveau context
+        """
+
         context = super().get_context_data(*args, **kwargs)
         panier = Panier.objects.filter(user=self.request.user)
         prof = UserProfile.objects.get(user=self.request.user)
@@ -50,40 +77,79 @@ class PanierHome(ListView):
 
         context["tot_achat"] = prof.number_of_purchase
         if context["nb_art_tot"] and context["price_tot"]:
-            if (context["nb_art_tot"] + context["tot_achat"]) > prof.reduction_threshold :
+            if (context["nb_art_tot"] + context["tot_achat"]) > prof.reduction_threshold :  
                 context["sum_reduc"] = context["price_tot"] * 0.9
                 context["reduc"] = "10 %"
             else:
                 context["reduc"] = "Non eligible à une reduction"
                 context["sum_reduc"] = context["price_tot"]
+        print(type(context))
         return context
 
     def get_queryset(self):
 
+        """Fonction renvoyant le panier d'un utilisateur
+
+        Returns:
+            QuerySet: Le panier de l'utilisateur.
+        """
+
         queryset = super().get_queryset()
         return queryset.filter(user = self.request.user)
 
+
 class DeletePanier(UserPassesTestMixin, DeleteView):
+
+    """
+    DeleteView supprimant des lignes de panier.
+    """
+
     model = Panier
     context_object_name = "panier"
     template_name = "commande/pannier_confirm_delete.html"
     success_url = reverse_lazy('commande:home')
 
     def test_func(self, *args, **kwargs):
+
+        """Fonction verifiant que l'utilisateur faisant la requete est bien un superuser ou l'utilisateur ayant créé la ligne.
+
+        Returns:
+            bool: True si l'utilisateur est autorisé et Fase si il ne l'est pas.
+        """
+
         return self.request.user.is_superuser or self.get_object() in Panier.objects.filter(user=self.request.user)
 
 class CreateCommande(CreateView):
+
+    """
+    CreateView validant un panier et créant une commande.
+    """
+    
     model = Panier
     template_name = "commande/create_commande.html"
     fields = []
 
     def get_context_data(self, **kwargs):
+
+        """Fonction modifiant le context pour y ajouter le nombre d'article à commander.
+
+        Returns:
+            dict: Le nouveau context
+        """
+
         context = super().get_context_data(**kwargs)
         panier = Panier.objects.filter(user=self.request.user)
         context["nb_art_tot"] = panier.aggregate(Sum('quantity'))['quantity__sum']
         return context
 
     def form_valid(self, form, **kwargs):
+
+        """Fonction créant une commande et ses lignes dans la DB
+
+        Returns:
+             HTTPResponse: L'url vers lequel l'utilisaeur sera redirigé après la validation de la commande
+        """
+
         panier = Panier.objects.filter(user=self.request.user)
         
         if len(panier) > 0:
@@ -110,6 +176,7 @@ class CreateCommande(CreateView):
             if msg:
                 msg = "Il manque " + msg + "l'expédition sera effectuée dès le prochain réaprovisionnement de stock"
                 messages.error(self.request, msg)
+
         else :
             messages.error(self.request, "Vous n'avez aucun articles dans votre panier")
 
@@ -118,12 +185,23 @@ class CreateCommande(CreateView):
 
 
 class UniqueCommande(CreateView):
+
+    """
+    CreateView creant une commande direct, sans passage par le panier.
+    """
+
     model = ValidatedOrder
     template_name = "commande/create_unique_commande.html"
     fields = [ "tot_quantity" ]
     success_url = reverse_lazy('articles:home')
 
     def form_valid(self, form):
+
+        """Fonction créant une commande directe et ses lignes dans la DB
+
+        Returns:
+            HTTPResponse: L'url vers lequel l'utilisaeur sera redirigé après la validation de la commande directe.
+        """
         article = get_object_or_404(Article, slug=self.kwargs['slug'])
         if article :
             tot_price = article.price * form.instance.tot_quantity
@@ -149,6 +227,11 @@ class UniqueCommande(CreateView):
 
 
 class CommandeHome(UserPassesTestMixin, ListView):
+
+    """
+    ListView affichant toutes les commandes du site sans exeption, reservé aux superusers.
+    """
+
     model = ValidatedOrder
     context_object_name = "commande"
     template_name = "commande/validatedorder_list.html"
@@ -157,6 +240,13 @@ class CommandeHome(UserPassesTestMixin, ListView):
         return self.request.user.is_superuser
 
     def get_context_data(self, **kwargs):
+
+        """Fonction modifiant le context pour y ajouter la quantitée max dans une commande, le prix max d'une commande et la date de la commande la plus recente.
+
+        Returns:
+            dict: Le nouveau context
+        """
+
         context = super().get_context_data(**kwargs)
         context['max_quatity'] = ValidatedOrder.objects.all().aggregate(Max('tot_quantity'))['tot_quantity__max']
         context['max_price'] = ValidatedOrder.objects.all().aggregate(Max('tot_price'))['tot_price__max']
@@ -165,6 +255,16 @@ class CommandeHome(UserPassesTestMixin, ListView):
         return context
 
     def get_queryset(self):
+
+        """Fonction les commandes trié selon le ce que l'utilisateur souhaite.
+            reservé aux supperusers.
+
+            Tri possible : par champs de recherche, par jour, par mois, par année, par quantité, par prix, par reductions, par date.
+
+        Returns:
+            QuerySet: Les commandes souhaitée tiée.
+        """
+
         queryset = super().get_queryset()
         query = self.request.GET.get('q')
 
@@ -183,58 +283,108 @@ class CommandeHome(UserPassesTestMixin, ListView):
         elif 'q2' in self.request.GET:
             query = self.request.GET.get('q2')
             if query == "Quantité" or query == "+Quantité":
-                return self.sort_queryset(query, queryset, 'Quantité', 'tot_quantity')
+                return self.sort_queryset(query, queryset, 'tot_quantity')
 
             elif query == "Prix total" or query == "+Prix total":
-                return self.sort_queryset(query, queryset, 'Prix total', 'tot_price')
+                return self.sort_queryset(query, queryset, 'tot_price')
 
             elif query == "Date" or query == "+Date":
-                return self.sort_queryset(query, queryset, 'Date', 'created_on')
+                return self.sort_queryset(query, queryset, 'created_on')
 
             elif query == "Reduction" or query == "+Reduction":
-                return self.sort_queryset(query, queryset, 'Reduction', 'reduction')
+                return self.sort_queryset(query, queryset, 'reduction')
 
         return queryset
 
-    def sort_queryset(self, query, queryset, strsort, col):
-        if query == '+' + strsort :
+    def sort_queryset(self, query, queryset, col):
+
+        """Fontion ordonant un queryset
+
+        Args:
+            query (str): La query donnée par l'utilisateur.
+            queryset (QuerySet): Le queryset à ordonner.
+            col (str): La colonne à ordonner
+
+        Returns:
+            QuerySet: Le queryset ordonné
+        """
+
+        if query[0] == '+' :
             return queryset.order_by(col)
-        elif query == strsort :
+        else :
             return queryset.order_by('-' + col)
 
 class DeleteCommande(UserPassesTestMixin, DeleteView):
+
+    """
+    DeleteView supprimant des commandes, reservé aux superusers.
+    """
+
     model = ValidatedOrder
     context_object_name = "commande"
     template_name = "commande/validatedorder_confirm_delete.html"
     success_url = reverse_lazy('commande:stat')
 
     def test_func(self, *args, **kwargs):
+
+        """Fonction verifiant que l'utilisateur faisant la requete est bien un superuser ou l'utilisateur ayant créé la ligne.
+
+        Returns:
+            bool: True si l'utilisateur est autorisé et Fase si il ne l'est pas.
+        """
+
         return self.request.user.is_superuser
 
 
 class DetailCommande(UserPassesTestMixin, DetailView):
+
+    """
+    DetailView affichant les detail d'une commande en particulié.
+    """
+
     model = ValidatedOrder
     context_object_name = "commande"
     template_name = "commande/validatedorder_detail.html"
     success_url = reverse_lazy('commande:stat')
 
     def test_func(self, *args, **kwargs):
+
+        
+
         print(self.request.resolver_match.kwargs.get('pk'))
         order = ValidatedOrder.objects.get(pk=self.request.resolver_match.kwargs.get('pk'))
         return self.request.user.is_superuser or order.user == self.request.user
 
     def get_context_data(self, *args, **kwargs):
+
+        """Fonction modifiant le context pour y ajouter les articles de la commande demandée.
+
+        Returns:
+            dict: Le nouveau context
+        """
+
         context = super().get_context_data(*args, **kwargs)
         context["articles"] = LigneCommande.objects.filter(order=kwargs['object'])
         return context
 
 class MyOrders(ListView):
+
+    """
+    ListView affichant toutes les commande d'un utilisateur en particulié.
+    """
+
     model = ValidatedOrder
     context_object_name = "commande"
     template_name = "commande/my_validatedorder_list.html"
 
 
     def get_queryset(self):
+
+        """Fonction modifiant le queryset afin de retourner seulement les commande de l'utilisateur authentifié.
+
+        Returns:
+            QuerySet: Les commande de l'utilisateur connecté.
+        """
         queryset = super().get_queryset().filter(user=self.request.user)
 
         return queryset

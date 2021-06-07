@@ -44,9 +44,9 @@
 
             {% if request.user.is_authenticated and request.user.is_superuser %}
                 <div class="d-flex justify-content-center align-items-center">
-                    <div class="row col-8">
+                    <div class="row col-sm-10 col-md-8">
                         <a class="btn btn-danger my-2" href="{% url 'articles:edit' slug=article.slug %}">Editer</a>
-                        <a class="btn btn-danger my-2" href="{% url 'articles:delete' slug=article.slug %}" class="text-danger">Supprimer</a>
+                        <a class="btn btn-danger my-2" href="{% url 'articles:delete' slug=article.slug %}">Supprimer</a>
                     </div>
                 </div>
             {% endif %}
