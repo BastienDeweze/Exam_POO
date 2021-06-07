@@ -87,12 +87,11 @@ class CreateCommande(CreateView):
         panier = Panier.objects.filter(user=self.request.user)
         
         if len(panier) > 0:
-            user = self.request.user
-            userprofile = UserProfile.objects.get(user=user)
+            userprofile = UserProfile.objects.get(user=self.request.user)
 
             vd = ValidatedOrder.objects.create(user=self.request.user)
             vd.tot_price_and_quantity_calculation()
-            msg = "Il manque "
+            msg = ""
             for article in panier:
                 lg = LigneCommande.objects.create(order=vd, article=article.articles, quantity=article.quantity)
                 lg.save()
@@ -108,10 +107,9 @@ class CreateCommande(CreateView):
             Panier.objects.filter(user=self.request.user).delete()
             messages.success(self.request, "Commande Effectuée")
 
-            if len(msg) > 10:
-                msg += "l'expédition sera effectuée dès le prochain réaprovisionnement de stock"
+            if msg:
+                msg = "Il manque " + msg + "l'expédition sera effectuée dès le prochain réaprovisionnement de stock"
                 messages.error(self.request, msg)
-
         else :
             messages.error(self.request, "Vous n'avez aucun articles dans votre panier")
 
