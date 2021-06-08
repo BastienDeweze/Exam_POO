@@ -9,13 +9,12 @@ from django.db.models import Sum
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from accounts.models import UserProfile
-from django.contrib.auth.mixins import UserPassesTestMixin
+from eSchop.views import UserPassesTestMixinCustom
 from django.db.models import Q, Max
 from django.utils import timezone
 
 from django.contrib import messages
 
-# Create your views here.
 
 class PanierCreate(CreateView):
 
@@ -98,7 +97,7 @@ class PanierHome(ListView):
         return queryset.filter(user = self.request.user)
 
 
-class DeletePanier(UserPassesTestMixin, DeleteView):
+class DeletePanier(UserPassesTestMixinCustom, DeleteView):
 
     """
     DeleteView supprimant des lignes de panier.
@@ -117,7 +116,7 @@ class DeletePanier(UserPassesTestMixin, DeleteView):
             bool: True si l'utilisateur est autorisé et Fase si il ne l'est pas.
         """
 
-        return self.request.user.is_superuser or self.get_object() in Panier.objects.filter(user=self.request.user)
+        return super().test_func(self, *args, **kwargs) or self.get_object() in Panier.objects.filter(user=self.request.user)
 
 class CreateCommande(CreateView):
 
@@ -226,7 +225,7 @@ class UniqueCommande(CreateView):
         return redirect('commande:home')
 
 
-class CommandeHome(UserPassesTestMixin, ListView):
+class CommandeHome(UserPassesTestMixinCustom, ListView):
 
     """
     ListView affichant toutes les commandes du site sans exeption, reservé aux superusers.
@@ -236,8 +235,6 @@ class CommandeHome(UserPassesTestMixin, ListView):
     context_object_name = "commande"
     template_name = "commande/validatedorder_list.html"
 
-    def test_func(self, *args, **kwargs):
-        return self.request.user.is_superuser
 
     def get_context_data(self, **kwargs):
 
@@ -256,13 +253,13 @@ class CommandeHome(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
 
-        """Fonction les commandes trié selon le ce que l'utilisateur souhaite.
+        """Fonction modifiant le queryset de commandes selon la requete de l'utilisateur.
             reservé aux supperusers.
 
             Tri possible : par champs de recherche, par jour, par mois, par année, par quantité, par prix, par reductions, par date.
 
         Returns:
-            QuerySet: Les commandes souhaitée tiée.
+            QuerySet: Les commandes souhaitée trié.
         """
 
         queryset = super().get_queryset()
@@ -298,7 +295,7 @@ class CommandeHome(UserPassesTestMixin, ListView):
 
     def sort_queryset(self, query, queryset, col):
 
-        """Fontion ordonant un queryset
+        """Fonction ordonnant un queryset
 
         Args:
             query (str): La query donnée par l'utilisateur.
@@ -314,7 +311,7 @@ class CommandeHome(UserPassesTestMixin, ListView):
         else :
             return queryset.order_by('-' + col)
 
-class DeleteCommande(UserPassesTestMixin, DeleteView):
+class DeleteCommande(UserPassesTestMixinCustom, DeleteView):
 
     """
     DeleteView supprimant des commandes, reservé aux superusers.
@@ -325,18 +322,8 @@ class DeleteCommande(UserPassesTestMixin, DeleteView):
     template_name = "commande/validatedorder_confirm_delete.html"
     success_url = reverse_lazy('commande:stat')
 
-    def test_func(self, *args, **kwargs):
 
-        """Fonction verifiant que l'utilisateur faisant la requete est bien un superuser ou l'utilisateur ayant créé la ligne.
-
-        Returns:
-            bool: True si l'utilisateur est autorisé et Fase si il ne l'est pas.
-        """
-
-        return self.request.user.is_superuser
-
-
-class DetailCommande(UserPassesTestMixin, DetailView):
+class DetailCommande(UserPassesTestMixinCustom, DetailView):
 
     """
     DetailView affichant les detail d'une commande en particulié.
@@ -349,11 +336,13 @@ class DetailCommande(UserPassesTestMixin, DetailView):
 
     def test_func(self, *args, **kwargs):
 
-        
+        """Redefinition de "UserPassesTestMixinCustom.test_func()" verifiant que l'utilisateur faisant la requete est bien un superuser ou l'utilisateur ayant créé la ligne.
 
-        print(self.request.resolver_match.kwargs.get('pk'))
-        order = ValidatedOrder.objects.get(pk=self.request.resolver_match.kwargs.get('pk'))
-        return self.request.user.is_superuser or order.user == self.request.user
+        Returns:
+            bool: True si l'utilisateur est autorisé et Fase si il ne l'est pas.
+        """
+
+        return super().test_func(self, *args, **kwargs) or self.get_object().user == self.request.user
 
     def get_context_data(self, *args, **kwargs):
 

@@ -27,12 +27,12 @@
                 {% endfor %}
 
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <strong >Prix total : {{ price_tot }} €</strong>
-                    <strong >Nobre d'articles : {{ nb_art_tot }} </strong>
+                    <strong >Prix total : {% if price_tot %} {{ price_tot }} €{% endif %}</strong>
+                    <strong >Nobre d'articles : {% if nb_art_tot %} {{ nb_art_tot }} {% endif %}</strong>
                 </li>
 
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <strong >Nouveau prix : {{ sum_reduc }} €</strong>
+                    <strong >Nouveau prix :{% if nb_art_tot %} {{ sum_reduc }} € {% endif %}</strong>
                     <strong >Reduction : {{ reduc }}</strong>
                 </li>
             </ul>

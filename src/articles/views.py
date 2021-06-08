@@ -5,19 +5,28 @@ from django.views.generic.edit import DeleteView, UpdateView
 from .models import Article, Category
 from django.db.models import Q
 from django.urls import reverse_lazy
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.contrib.auth.mixins import UserPassesTestMixin
-
+from eSchop.views import UserPassesTestMixinCustom
 from django.contrib import messages
 
-# Create your views here.
-
 class ArticleHome(ListView):
+
+    """
+    ListView listant les articles du shop.
+    """
+
     model = Article
     context_object_name = "articles"
 
     def get_queryset(self):
+
+        """Fonction modifiant le queryset de commandes selon la requete de l'utilisateur.
+
+            Tri possible : top 3 de meilleures ventes, top 3 des pires ventes, alerte de stock. (réservé superuser)
+
+        Returns:
+            QuerySet: Les articles trié.
+        """
+
         queryset = super().get_queryset()
         queryset = queryset if self.request.user.is_superuser else queryset.filter(published=True)
         query = self.request.GET.get('q')
@@ -41,39 +50,44 @@ class ArticleHome(ListView):
 
         return queryset
 
-@method_decorator(login_required, name='dispatch')
-class ArticleCreate(UserPassesTestMixin, CreateView):
+
+class ArticleCreate(UserPassesTestMixinCustom, CreateView):
+
+    """
+    CreateView créant un article. (réservé superuser)
+    """
+
     model = Article
     template_name = "articles/create_article.html"
     fields = ['name', 'description', 'price', 'categories', 'thumbnail']
-
-    def test_func(self, *args, **kwargs):
-        return self.request.user.is_superuser
-
-    def form_valid(self, form) :
-        return super().form_valid(form)
     
 
 
-class ArticleUpdate(UserPassesTestMixin, UpdateView):
+class ArticleUpdate(UserPassesTestMixinCustom, UpdateView):
+
+    """
+    UpdateView modifiant le contenu d'une ligne d'article.
+    """
+
     model = Article
     template_name = "articles/create_edit.html"
     fields = ['thumbnail', 'name', 'description', 'price', 'stock', 'published']
 
-    def test_func(self, *args, **kwargs):
-        return self.request.user.is_superuser
-
-    def form_valid(self, form) :
-        return super().form_valid(form)
-
 class ArticleDetail(DetailView):
+
+    """
+    DetailView affichant les detail d'un article en particulié.
+    """
+
     model = Article
     context_object_name = "article"
 
-class ArticleDelete(UserPassesTestMixin, DeleteView):
+class ArticleDelete(UserPassesTestMixinCustom, DeleteView):
+
+    """
+    DeleteView supprimant des articles, reservé aux superusers.
+    """
+
     model = Article
     success_url = reverse_lazy('articles:home')
     context_object_name = "article"
-
-    def test_func(self, *args, **kwargs):
-        return self.request.user.is_superuser
